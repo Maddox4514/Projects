@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body{
+            font-family: Arial, Helvetica, sans-serif;
+            max-width: 600px;
+            margin: 0px auto;
+            padding: 20px;
+            background-color: #f4f7fa;
+            color: #333
+        }
+
+        h1{
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+
+        #taskInput{
+            flex: 1;
+            padding: 12px;
+            font-size: 15px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        #taskInput:focus{
+            border-color: #3498db;
+        }
+
+        button{
+            padding: 12px 20px;
+            font-size: 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .task-list {
+            list-style: none;
+            padding: 0;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .task-item{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            transition: background-color 0.3s;
+
+        }
+
+        .task-item:last-child{
+            border-bottom: none;
+        }
+
+        .task-item:hover{
+            background-color: #f9f9f9;
+        }
+
+        .task-item span{
+            flex: 1;
+            margin-right: 10px;
+        }
+
+
+        .task-item button {
+            margin-left: 5px;
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+
+        .task-item button:nth-child(1) {
+            background-color: #e67e22;
+        }
+
+        .task-item button:nth-child(1):hover {
+            background-color: #d35400;
+        }
+
+        .task-item button:nth-child(2) {
+            background-color: #e74c3c;
+        }
+
+        .task-item button:nth-child(2):hover{
+            background-color: #c0392b;
+        }
+
+        .clear-button{
+            display: block;
+            margin: 20px auto 0;
+            background-color: #95a5a6;
+        }
+
+        .clear-button:hover{
+            background-color: #7f8c8d;
+        }
+
+        @media(max-width: 600px) {
+            .input-area {
+                flex-direction: column;
+            }
+            button {
+                width: 100%;
+            }
+            .task-item{
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .task-item button{
+                width: 100%;
+                margin: 5px 0 0 0;
+            }
+        }
+
+        .input-area{
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>To-do list(My daily routine)</h1>
+    <div class="input-area">
+        <input type="text" id="taskInput" placeholder="Enter a new task">
+        <button onclick="addTask()">Add Task</button>
+    </div>
+
+    <ul id="taskList" class="task-list"></ul>
+    <button class="clear-button" onclick="clearTasks()">Clear All Tasks</button>
+    
+  <script>
+        function loadTasks(){
+    let savedTasks = localStorage.getItem("tasks");
+    return savedTasks ? JSON.parse(savedTasks): [];
+    }
+    function saveTasks() {
+       localStorage.setItem("tasks", JSON.stringify(tasks));
+    }
+
+    let  tasks = loadTasks();
+
+    function renderTasks() {
+        let taskList =document.getElementById("taskList");
+        taskList.innerHTML= "";
+        tasks.forEach((task, index) => {
+            let li = document.createElement("li");
+            li.className = "task-item";
+            li.innerHTML = ` 
+            <span>${task.text}</span>
+              <div>
+                <button  onclick = "editTask(${index})">Edit</button>
+                <button  onclick = "deleteTask(${index})">Delete</button>
+                </div> `;
+                taskList.appendChild(li);
+        });
+    }
+
+    function addTask(){
+        let taskInput = document.getElementById("taskInput");
+        let taskText = taskInput.value.trim();
+        if (taskText) {
+            tasks.push({text: taskText, done:false});
+            saveTasks();
+            renderTasks();
+            taskInput.value = "";
+        } else {
+            alert("Task cannot be empty");
+        }
+    }
+
+    function deleteTask(index) {
+        tasks.splice(index, 1);
+        saveTasks();
+        renderTasks();
+    }
+
+    function editTask(index){
+        let newText = prompt("Edit the task:", tasks[index].text);
+        if (newText !== null && newText.trim() !== "") {
+            tasks[index].text = newText.trim();
+            saveTasks();
+            renderTasks();
+        }  else if (newText !== null){
+            alert("Task Text cannot be empty!");
+        }
+    }
+
+    function clearTasks() {
+        if (tasks.length === 0) {
+            alert("No task to clear!");
+            return;
+        }
+        let confirmed = confirm("Are you sure you want to clear all tasks?");
+        if (confirmed) {
+            tasks = [];
+            saveTasks();
+            renderTasks();
+        }
+    }
+
+    renderTasks();
+
+    document.getElementById('taskInput').addEventListener("keypress", function(event) {
+        if(event.key === "Enter") {
+            addTask();
+        }
+    });
+
+   </script>
+</body>
+</html>
